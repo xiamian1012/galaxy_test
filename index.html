@@ -1,58 +1,125 @@
+<!--
+    THIS EXAMPLE WAS DOWNLOADED FROM https://echarts.apache.org/examples/zh/editor.html?c=scatter3d-globe-population&gl=1
+-->
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="description" content="galaxy display">    
-<title>galaxy display</title>    
-<style>
-html,body{height:100%;width:100%;padding:0px;margin:0;box-sizing:border-box;}
-    
-#app {
-    width: 100%;
-    height: 100%;
-}    
-#chart1 {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    width: 1420px;
-    height: 700px;
-}
-#background {
-    position: absolute;
-    background-color: #000000;
-    width: 100%;
-    height: 100%;
-    top: 0px;
-    z-index: 0;
-}
+<html style="height: 100%">
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body style="height: 100%; margin: 0">
+        <div id="container" style="height: 100%"></div>
 
-</style>
-<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.1.2/echarts.min.js"></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.12/vue.js"></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/echarts-gl/2.0.7/echarts-gl.min.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.3.0/dist/echarts.min.js"></script>
+        <!-- Uncomment this line if you want to dataTool extension
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.3.0/dist/extension/dataTool.min.js"></script>
+        -->
+  
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
 
-</head>
-<body>
-<div id="background">
-    <img src="https://cdn.jsdelivr.net/gh/xiamian1012/echarts@store/icon/background4.jpg"/>
-</div>
-
-</body>
+        <!-- Uncomment this line if you want to echarts-stat extension
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts-stat@latest/dist/ecStat.min.js"></script>
+        -->
+        <!-- Uncomment this line if you want to use map
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.3.0/map/js/china.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.3.0/map/js/world.js"></script>
+        -->
+        <!-- Uncomment these two lines if you want to use bmap extension
+        <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=<Your Key Here>"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@{{version}}/dist/extension/bmap.min.js"></script>
+        -->
 
         <script type="text/javascript">
-        // 一开始加载就适应屏幕的宽高
-        $(function() {
-            //offsetWidth： 获取body元素对象的宽度，即offsetWidth=width+padding+border availWidth：返回当前屏幕宽度
-            var scale = document.body.clientWidth / 1920;
-            $(document.body).css("zoom",  scale );
-        });
-        $(window).resize(function() {
-            var scale = document.body.clientWidth / 1920;
-            $(document.body).css("zoom", scale );
-        });
+var dom = document.getElementById("container");
+var myChart = echarts.init(dom);
+var app = {};
 
-     </script>
+var option;
+
+var ROOT_PATH = 'https://cdn.jsdelivr.net/gh/apache/echarts-website@asf-site/examples'
+
+$.getJSON(ROOT_PATH + '/data-gl/asset/data/population.json', function (data) {
+  data = data
+    .filter(function (dataItem) {
+      return dataItem[2] > 0;
+    })
+    .map(function (dataItem) {
+      return [dataItem[0], dataItem[1], Math.sqrt(dataItem[2])];
+    });
+  myChart.setOption({
+    visualMap: {
+      show: false,
+      min: 0,
+      max: 60,
+      inRange: {
+        symbolSize: [1.0, 10.0]
+      }
+    },
+    globe: {
+      environment: ROOT_PATH + '/data-gl/asset/starfield.jpg',
+      heightTexture:
+        ROOT_PATH + '/data-gl/asset/bathymetry_bw_composite_4k.jpg',
+      displacementScale: 0.05,
+      displacementQuality: 'high',
+      globeOuterRadius: 100,
+      baseColor: '#000',
+      shading: 'realistic',
+      realisticMaterial: {
+        roughness: 0.2,
+        metalness: 0
+      },
+      postEffect: {
+        enable: true,
+        depthOfField: {
+          focalRange: 15,
+          enable: true,
+          focalDistance: 100
+        }
+      },
+      temporalSuperSampling: {
+        enable: true
+      },
+      light: {
+        ambient: {
+          intensity: 0
+        },
+        main: {
+          intensity: 0.1,
+          shadow: false
+        },
+        ambientCubemap: {
+          texture: ROOT_PATH + '/data-gl/asset/lake.hdr',
+          exposure: 1,
+          diffuseIntensity: 0.5,
+          specularIntensity: 2
+        }
+      },
+      viewControl: {
+        autoRotate: false,
+        beta: 180,
+        alpha: 20,
+        distance: 100
+      }
+    },
+    series: {
+      type: 'scatter3D',
+      coordinateSystem: 'globe',
+      blendMode: 'lighter',
+      symbolSize: 2,
+      itemStyle: {
+        color: 'rgb(50, 50, 150)',
+        opacity: 1
+      },
+      data: data
+    }
+  });
+});
+
+if (option && typeof option === 'object') {
+    myChart.setOption(option);
+}
+
+        </script>
+    </body>
 </html>
+    
